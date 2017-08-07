@@ -1,7 +1,6 @@
 package com.amithkoujalgi.interpreter.server;
 
 import com.amithkoujalgi.interpreter.PythonInterpreterHandle;
-import com.amithkoujalgi.interpreter.util.JSONUtils;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketClose;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketConnect;
@@ -12,20 +11,25 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 @WebSocket
 public class InterpreterWebSocket {
     private InterpreterSession interpreterSession;
 
     public InterpreterWebSocket() {
-        System.out.println("Created object of " + InterpreterWebSocket.class);
+        //System.out.println("Created object of " + InterpreterWebSocket.class);
     }
 
     @OnWebSocketMessage
     public void onText(Session session, String message) throws IOException {
-        JSONUtils.print(message);
         if (message.contains("\n")) {
-            String[] lines = message.split("\n");
+
+            ArrayList<String> lines = new ArrayList<>();
+            lines.addAll(Arrays.asList(message.split("\n")));
+            lines.add("\n");
+
             for (String line : lines) {
                 interpreterSession.getPythonInterpreterHandle().write(line);
                 interpreterSession.setReader(new PythonOutputReader(interpreterSession.getPythonInterpreterHandle().getPythonOutputStream(), session));
@@ -92,8 +96,7 @@ class PythonOutputReader implements Runnable {
                 char c = (char) reader.read();
                 sb.append(c);
                 session.getRemote().sendString(c + "");
-                System.out.print(c);
-                if (sb.toString().endsWith(">>>")) {
+                if (sb.toString().endsWith(">>>") || sb.toString().endsWith("...")) {
                     break;
                 }
             } catch (Exception e) {

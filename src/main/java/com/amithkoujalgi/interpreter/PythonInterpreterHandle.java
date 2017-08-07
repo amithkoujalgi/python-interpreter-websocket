@@ -77,18 +77,9 @@ class PythonCommandWriter extends Thread {
                 }
                 Thread.sleep(1);
                 if (messageAdded && !executed) {
-                    if (msg.contains("\n")) {
-                        String[] lines = msg.split("\n");
-                        for (String line : lines) {
-                            writer.write(line);
-                            writer.newLine();
-                            writer.flush();
-                        }
-                    } else {
-                        writer.write(msg);
-                        writer.newLine();
-                        writer.flush();
-                    }
+                    writer.write(msg);
+                    writer.newLine();
+                    writer.flush();
                     messageAdded = false;
                     executed = true;
                 }
