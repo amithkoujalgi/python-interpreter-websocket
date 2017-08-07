@@ -37,10 +37,10 @@ public class PythonInterpreterHandle extends Thread {
 
     public void kill() {
         pythonCommandWriter.kill();
-        try {
-            Thread.sleep(2000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+        while (true) {
+            if (!pythonCommandWriter.isAlive()) {
+                break;
+            }
         }
         p.destroy();
     }
@@ -75,18 +75,28 @@ class PythonCommandWriter extends Thread {
                     System.out.println("Terminating Python interpreter...");
                     break;
                 }
-                Thread.sleep(100);
+                Thread.sleep(1);
                 if (messageAdded && !executed) {
-                    writer.write(msg);
-                    writer.newLine();
-                    writer.flush();
+                    if (msg.contains("\n")) {
+                        String[] lines = msg.split("\n");
+                        for (String line : lines) {
+                            writer.write(line);
+                            writer.newLine();
+                            writer.flush();
+                        }
+                    } else {
+                        writer.write(msg);
+                        writer.newLine();
+                        writer.flush();
+                    }
                     messageAdded = false;
                     executed = true;
                 }
             } catch (Exception e) {
-                e.printStackTrace();
                 if (e.getMessage().contains("Stream closed")) {
                     break;
+                } else {
+                    e.printStackTrace();
                 }
             }
         }

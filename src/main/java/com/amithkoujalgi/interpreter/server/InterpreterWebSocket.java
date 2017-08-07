@@ -1,6 +1,7 @@
 package com.amithkoujalgi.interpreter.server;
 
 import com.amithkoujalgi.interpreter.PythonInterpreterHandle;
+import com.amithkoujalgi.interpreter.util.JSONUtils;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketClose;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketConnect;
@@ -22,11 +23,31 @@ public class InterpreterWebSocket {
 
     @OnWebSocketMessage
     public void onText(Session session, String message) throws IOException {
-        System.out.println("Command: " + message);
-        interpreterSession.getPythonInterpreterHandle().write(message);
-        interpreterSession.setReader(new PythonOutputReader(interpreterSession.getPythonInterpreterHandle().getPythonOutputStream(), session));
-        Thread reader = new Thread(interpreterSession.getReader(), "reader");
-        reader.start();
+        JSONUtils.print(message);
+        if (message.contains("\n")) {
+            String[] lines = message.split("\n");
+            for (String line : lines) {
+                interpreterSession.getPythonInterpreterHandle().write(line);
+                interpreterSession.setReader(new PythonOutputReader(interpreterSession.getPythonInterpreterHandle().getPythonOutputStream(), session));
+                Thread reader = new Thread(interpreterSession.getReader(), "reader");
+                reader.start();
+                while (true) {
+                    if (!reader.isAlive()) {
+                        break;
+                    }
+                }
+            }
+        } else {
+            interpreterSession.getPythonInterpreterHandle().write(message);
+            interpreterSession.setReader(new PythonOutputReader(interpreterSession.getPythonInterpreterHandle().getPythonOutputStream(), session));
+            Thread reader = new Thread(interpreterSession.getReader(), "reader");
+            reader.start();
+            while (true) {
+                if (!reader.isAlive()) {
+                    break;
+                }
+            }
+        }
     }
 
     @OnWebSocketConnect
@@ -35,10 +56,10 @@ public class InterpreterWebSocket {
         interpreterSession = new InterpreterSession();
         interpreterSession.setPythonInterpreterHandle(new PythonInterpreterHandle());
         interpreterSession.getPythonInterpreterHandle().start();
-        try {
-            Thread.sleep(1000);
-        } catch (Exception e) {
-            e.printStackTrace();
+        while (true) {
+            if (interpreterSession.getPythonInterpreterHandle().getPythonOutputStream() != null) {
+                break;
+            }
         }
         interpreterSession.setReader(new PythonOutputReader(interpreterSession.getPythonInterpreterHandle().getPythonOutputStream(), session));
         Thread reader = new Thread(interpreterSession.getReader(), "reader");
@@ -71,11 +92,19 @@ class PythonOutputReader implements Runnable {
                 char c = (char) reader.read();
                 sb.append(c);
                 session.getRemote().sendString(c + "");
+                System.out.print(c);
                 if (sb.toString().endsWith(">>>")) {
                     break;
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                if (e.getMessage().contains("Stream closed")) {
+                    break;
+                }
+                if (e.getMessage().contains("RemoteEndpoint unavailable")) {
+                    break;
+                } else {
+                    e.printStackTrace();
+                }
             }
         }
     }
