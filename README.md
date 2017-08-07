@@ -21,3 +21,14 @@ Type "help", "copyright", "credits" or "license" for more information.
 You can now type in Python commands from a web interface.
 
 And yes, you can have multiple instances of Python interpreters - just open another tab in the browser.
+
+To run with CORS support, run the following:
+```
+mvn clean install
+java -jar target/interpreter.jar
+```
+
+or, just run the build script:
+```
+./build.sh
+```
