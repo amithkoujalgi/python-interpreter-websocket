@@ -2,19 +2,7 @@
 <body>
 	<div>
 		<textarea rows="4" style="width:100%" id="input">
-from bbcliutils.rztdata import ExecContexts
-from bbcliutils.rztdata import SampleType
-from bbcliutils.rztdata.RZTData import RZTData
-
-file1 = '/Users/dev/Documents/workspace/bigbrain/fasttrack/bbcliutils/bbcliutils/samples/rztdatatest/test_data.csv'
-
-dsconfig1 = dict()
-dsconfig1["path"] = file1
-dsconfig1["encoding"] = "utf-8"
-
-rzt = RZTData(ExecContexts.experiment)
-df1 = rzt.read(dsconfig1)
-df1.sample(num_rows=8, sample_type=SampleType.random).print()</textarea>
+print("hello")</textarea>
 	</div>
 	<div>
 		<input type="button" id="connectBtn" value="CONNECT"
@@ -39,7 +27,7 @@ df1.sample(num_rows=8, sample_type=SampleType.random).print()</textarea>
 			return;
 		}
 		var host = window.location.host;
-		host="ws://"+host+"/interpreter";
+		host="ws://"+host+"/interpreter/";
 		console.log(host)
 		// Create a websocket
 		webSocket = new WebSocket(host);

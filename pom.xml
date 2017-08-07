@@ -73,7 +73,18 @@
             <version>${jetty.version}</version>
         </dependency>
         <!--Jetty Websocket client side  dependencies end here -->
-
+        <!-- https://mvnrepository.com/artifact/org.eclipse.jetty/jetty-servlets -->
+        <dependency>
+            <groupId>org.eclipse.jetty</groupId>
+            <artifactId>jetty-servlets</artifactId>
+            <version>${jetty.version}</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.eclipse.jetty/jetty-util -->
+        <dependency>
+            <groupId>org.eclipse.jetty</groupId>
+            <artifactId>jetty-util</artifactId>
+            <version>${jetty.version}</version>
+        </dependency>
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
@@ -84,6 +95,7 @@
             <artifactId>commons-io</artifactId>
             <version>2.5</version>
         </dependency>
+
 
     </dependencies>
 </project>
