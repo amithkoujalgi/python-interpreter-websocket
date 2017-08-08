@@ -78,7 +78,7 @@ class PythonCommandWriter extends Thread {
                 Thread.sleep(1);
                 if (messageAdded && !executed) {
                     writer.write(msg);
-                    writer.newLine();
+                    // writer.newLine();
                     writer.flush();
                     messageAdded = false;
                     executed = true;

@@ -1,6 +1,8 @@
 package com.amithkoujalgi.interpreter.server;
 
 import com.amithkoujalgi.interpreter.PythonInterpreterHandle;
+import com.amithkoujalgi.interpreter.util.JSONUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketClose;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketConnect;
@@ -11,8 +13,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 @WebSocket
 public class InterpreterWebSocket {
@@ -25,11 +27,8 @@ public class InterpreterWebSocket {
     @OnWebSocketMessage
     public void onText(Session session, String message) throws IOException {
         if (message.contains("\n")) {
-
-            ArrayList<String> lines = new ArrayList<>();
-            lines.addAll(Arrays.asList(message.split("\n")));
-            lines.add("\n");
-
+            List<String> lines = getStringListSeparatedChar(message, '\n');
+            JSONUtils.print(lines);
             for (String line : lines) {
                 interpreterSession.getPythonInterpreterHandle().write(line);
                 interpreterSession.setReader(new PythonOutputReader(interpreterSession.getPythonInterpreterHandle().getPythonOutputStream(), session));
@@ -74,6 +73,15 @@ public class InterpreterWebSocket {
     public void onClose(Session session, int status, String reason) {
         System.out.println("Client closed!");
         interpreterSession.getPythonInterpreterHandle().kill();
+    }
+    
+    private List<String> getStringListSeparatedChar(String text, char character) {
+        // a hack to fetch lines separated by newline characters
+        text = StringUtils.replace(text, "\n", "@@##");
+        String[] s = StringUtils.split(text, "##");
+        List<String> l = Arrays.asList(s);
+        l.replaceAll(x -> x.replace("@@", "\n"));
+        return l;
     }
 }
 
