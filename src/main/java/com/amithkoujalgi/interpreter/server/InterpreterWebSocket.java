@@ -74,7 +74,7 @@ public class InterpreterWebSocket {
         System.out.println("Client closed!");
         interpreterSession.getPythonInterpreterHandle().kill();
     }
-    
+
     private List<String> getStringListSeparatedChar(String text, char character) {
         // a hack to fetch lines separated by newline characters
         text = StringUtils.replace(text, "\n", "@@##");

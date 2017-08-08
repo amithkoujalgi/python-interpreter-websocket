@@ -29,6 +29,8 @@ public class Application {
             @Override
             public void configure(WebSocketServletFactory webSocketServletFactory) {
                 webSocketServletFactory.register(InterpreterWebSocket.class);
+                int timeoutMinutes = 30;
+                webSocketServletFactory.getPolicy().setIdleTimeout(60000 * timeoutMinutes);
             }
         });
 
