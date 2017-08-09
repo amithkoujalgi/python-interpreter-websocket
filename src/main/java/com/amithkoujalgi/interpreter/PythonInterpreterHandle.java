@@ -1,5 +1,7 @@
 package com.amithkoujalgi.interpreter;
 
+import com.amithkoujalgi.interpreter.util.Config;
+
 import java.io.*;
 import java.util.Map;
 
@@ -17,8 +19,17 @@ public class PythonInterpreterHandle extends Thread {
     public void startInterpreter() {
         try {
             System.out.println("Starting Python interpreter...");
-            ProcessBuilder pb = new ProcessBuilder(
-                    "/usr/bin/script", "-q", "/dev/null", "/usr/local/bin/python3");
+            String pythonPath = Config.getInstance().getConfig().getProperty("PYTHON_BINARY_PATH");
+            ProcessBuilder pb;
+            if (OSUtils.isMac()) {
+                pb = new ProcessBuilder(
+                        "/usr/bin/script", "-q", "/dev/null", pythonPath);
+            } else if (OSUtils.isUnix()) {
+                pb = new ProcessBuilder(
+                        "/usr/bin/script", "-qfc", pythonPath, "/dev/null");
+            } else {
+                throw new Exception("Platform not supported!");
+            }
             Map<String, String> map = pb.environment();
             p = pb.start();
 
@@ -101,5 +112,25 @@ class PythonCommandWriter extends Thread {
 
     public void kill() {
         shouldInterrupt = true;
+    }
+}
+
+class OSUtils {
+    private static String OS = System.getProperty("os.name").toLowerCase();
+
+    public static boolean isWindows() {
+        return (OS.indexOf("win") >= 0);
+    }
+
+    public static boolean isMac() {
+        return (OS.indexOf("mac") >= 0);
+    }
+
+    public static boolean isUnix() {
+        return (OS.indexOf("nix") >= 0 || OS.indexOf("nux") >= 0 || OS.indexOf("aix") > 0);
+    }
+
+    public static boolean isSolaris() {
+        return (OS.indexOf("sunos") >= 0);
     }
 }

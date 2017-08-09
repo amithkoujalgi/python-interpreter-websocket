@@ -1,5 +1,6 @@
 package com.amithkoujalgi.interpreter.server;
 
+import com.amithkoujalgi.interpreter.util.Config;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.HandlerList;
@@ -11,11 +12,12 @@ import org.eclipse.jetty.websocket.server.WebSocketHandler;
 import org.eclipse.jetty.websocket.servlet.WebSocketServletFactory;
 
 import javax.servlet.DispatcherType;
+import java.io.IOException;
 import java.util.EnumSet;
 
 public class Application {
     public static void main(String[] args) throws Exception {
-        int port = 8080;
+        int port = Integer.parseInt(Config.getInstance().getConfig().getProperty("SERVER_PORT"));
         Server server = new Server(port);
 
         ResourceHandler h = new ResourceHandler();
@@ -29,7 +31,12 @@ public class Application {
             @Override
             public void configure(WebSocketServletFactory webSocketServletFactory) {
                 webSocketServletFactory.register(InterpreterWebSocket.class);
-                int timeoutMinutes = 30;
+                int timeoutMinutes = 0;
+                try {
+                    timeoutMinutes = Integer.parseInt(Config.getInstance().getConfig().getProperty("WEBSOCKET_TIMEOUT_MINUTES"));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
                 webSocketServletFactory.getPolicy().setIdleTimeout(60000 * timeoutMinutes);
             }
         });
